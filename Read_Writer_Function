@@ -5,4 +5,4 @@ def xlsx_read_concat_write(a, t, h):
     for s in a:
         dicti[s] = pd.read_excel(s, header=h)
     df= pd.concat(dicti)
-    df.to_excel((r'O:\Data Quality\Alan Blunden\Concatenated files\Concat_File_%s.xlsx' % t), sheet_name=t)
+    df.to_excel((r'O:\Data Quality\Data\Concatenated files\Concat_File_%s.xlsx' % t), sheet_name=t)
