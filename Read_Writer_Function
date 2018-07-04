@@ -1,8 +1,28 @@
-def xlsx_read_concat_write(a, t, h):
-    # Save me time reading in xlsl files from a given file path
-    dicti = {}
-    df = pd.DataFrame()
-    for s in a:
-        dicti[s] = pd.read_excel(s, header=h)
-    df= pd.concat(dicti)
-    df.to_excel((r'O:\Data Quality\Data\Concatenated files\Concat_File_%s.xlsx' % t), sheet_name=t)
+from glob import glob
+import pandas as pd
+
+def xlsx_read_concat_write(Data_Source, Data_Name, header=0,footer=0):
+    dictionary = {}
+    error_list = []
+    for source in Data_Source:
+        if footer > 0 :
+            try:
+                dictionary[source] = pd.read_excel(source, header=header)
+                dictionary[source].drop(dictionary[source].tail(footer).index, inplace=True)
+            except Exception as exept:
+                print(exept)
+                error_list.append(source + ':' + str(exept))
+        else:
+            try:
+                dictionary[source] = pd.read_excel(source, header=header)
+                df = pd.concat(dictionary)
+            except Exception as exept:
+                print(exept)
+                error_list.append(source + ':' + str(exept))
+    df.dropna(how='all')
+    df.to_excel(('File Path' % Data_Name),
+                sheet_name=Data_Name)
+    save_errors = open(('File Path' % Data_Name)
+                       , 'w')
+    save_errors.write("\n".join(error_list))
+    save_errors.close()
