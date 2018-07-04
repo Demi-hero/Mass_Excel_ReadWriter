@@ -1,8 +1,19 @@
-def xlsx_read_concat_write(a, t, h):
-    # Save me time reading in xlsl files from a given file path
-    dicti = {}
-    df = pd.DataFrame()
-    for s in a:
-        dicti[s] = pd.read_excel(s, header=h)
-    df= pd.concat(dicti)
-    df.to_excel((r'O:\Data Quality\Data\Concatenated files\Concat_File_%s.xlsx' % t), sheet_name=t)
+def data_transformations (data_source):
+      if (type(data_source) != type(dict)) or (type(data_source) != type(collections.OrderedDict())):
+         raise TypeError ('Type needs to be a dictionary')
+    dataframe = pd.DataFrame()
+    for key, value in data_source.items():
+        #print(value.head(10))
+        value['Month'] = key
+        dataframe = pd.concat([dataframe,value])
+    return dataframe
+
+def combine_data(data_sources,data_names):
+    if len(data_sources) != len(data_names):
+        raise ValueError ('Should have an equal count of names to sources')
+    output = {}
+    for name_, source in zip(data_names, data_sources):
+        output[name_] = data_transformations(source)
+    Final_output = pd.concat(output)
+    Final_output.set_index('Month', append=True, inplace=True)
+    Final_output.to_excel('File Path' ,sheet_name='FLP')
