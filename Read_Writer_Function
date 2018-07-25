@@ -1,7 +1,7 @@
 from glob import glob
 import pandas as pd
 
-def xlsx_read_concat_write(Data_Source, Data_Name, header=0,footer=0):
+def xlsx_read_concat_write(Data_Source, Data_Name, header=0,footer=0,txt_seperator=','):
     dictionary = {}
     error_list = []
     for source in Data_Source:
@@ -9,6 +9,7 @@ def xlsx_read_concat_write(Data_Source, Data_Name, header=0,footer=0):
             try:
                 dictionary[source] = pd.read_excel(source, header=header)
                 dictionary[source].drop(dictionary[source].tail(footer).index, inplace=True)
+                df = pd.concat(dictionary)
             except Exception as exept:
                 print(exept)
                 error_list.append(source + ':' + str(exept))
@@ -16,13 +17,21 @@ def xlsx_read_concat_write(Data_Source, Data_Name, header=0,footer=0):
             try:
                 dictionary[source] = pd.read_excel(source, header=header)
                 df = pd.concat(dictionary)
-            except Exception as exept:
-                print(exept)
-                error_list.append(source + ':' + str(exept))
+            except Exception as exeption:
+                if ".txt" in source:
+                    try:
+                        dictionary[source] = pd.read_csv(source,header=header, sep=txt_seperator, encoding='latin1')
+                        df = pd.concat(dictionary)
+                    except Exception as exeption2:
+                        print(exeption2)
+                        error_list.append(source + ':' + str(exeption2))
+                else:
+                    print(exeption)
+                    error_list.append(source + ':' + str(exeption))
     df.dropna(how='all')
-    df.to_excel(('File Path' % Data_Name),
+    df.to_excel((r'O:\Declarations\EDI\Guardsman\Combined File\Claims Work\Concat_File_%s.xlsx' % Data_Name),
                 sheet_name=Data_Name)
-    save_errors = open(('File Path' % Data_Name)
+    save_errors = open((r'O:\Declarations\EDI\Guardsman\Combined File\Claims Work\%s_Error_Files.txt' % Data_Name)
                        , 'w')
     save_errors.write("\n".join(error_list))
     save_errors.close()
